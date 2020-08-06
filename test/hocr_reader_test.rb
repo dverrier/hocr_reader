@@ -24,6 +24,6 @@ HEREDOC
   end
 
   def test_it_extracts_words
-    assert_equal 'Name Arial Century Peter',extract_words_from_html(@hocr).strip   
+    assert_equal 'Name Arial Century Peter',@reader.to_s(@reader.hocr_to_text(@hocr)).strip
   end
 end

@@ -4,60 +4,51 @@ require "hocr_reader/part"
 require 'nokogiri'
 
 module HocrReader
+  Parts = [:ocr_page,
+        :ocr_carea,
+        :ocr_par,
+        :ocr_line,
+        :ocrx_word]
+
+  Tags = {ocr_page: 'div class=ocr_page',
+          ocr_carea: 'div class=ocr_carea',
+          ocr_par: 'class=ocr_par',
+          ocr_line: 'span class=ocr_line',
+          ocrx_word: 'span.ocrx_word'}
+
   class Reader
-  
-    
+    attr_accessor :string, :parts
+    def initialize(str)
+      @string = str
+    end
 
-    # Parts = ['ocr_page',
-    #     'ocr_carea',
-    #     'ocr_par',
-    #     'ocr_line',
-    #     'ocrx_word']
-
-    #   Tags = {ocr_page: 'div class=ocr_page',
-    #           ocr_carea: 'div class=ocr_carea',
-    #           ocr_par: 'class=ocr_par',
-    #           ocr_line: 'span class=ocr_line',
-    #           ocrx_word: 'span class=ocrx_word'}
-
-    def hocr_to_text(str)
-      html = Nokogiri::HTML(str)
-      extract_words_from_html(html)
+    def hocr_to_text
+      html = Nokogiri::HTML(@string)
+      extract_parts_from_html(html,:ocrx_word)
+      convert_to_s(@parts)
     end
 
 
-    def extract_words_from_html(html)
-      pos_info_words = []
-
-      html.css('span.ocrx_word, span.ocr_word')
+    def extract_parts_from_html(html, part_name)
+      @parts = []
+      tag = Tags[part_name]
+      tag_pair = tag + ', ' + tag
+      # 'span.ocrx_word, span.ocr_word'
+        html.css(tag_pair)
           .reject { |word| word.text.strip.empty? }
           .each do |word|
         word_attributes = word.attributes['title'].value.to_s
                               .delete(';').split(' ')
-        pos_info_word = Part.new(word, word_attributes)
-        pos_info_words.push pos_info_word
+        part = Part.new(word, word_attributes)
+        @parts.push part
       end
-      pos_info_words
     end
 
 
-    def to_s(pos_info_words)
+    def convert_to_s(parts)
       s = ''
-      pos_info_words.each do |part|
-        # s << part[:word] + ' '
-        s << part.text + ' '
-      end
+      parts.each {|part| s = s + part.text + ' '}
       s
-    end
-
-    def word_info(word, data)
-      {
-        word: word.text,
-        x_start: data[1].to_i,
-        y_start: data[2].to_i,
-        x_end: data[3].to_i,
-        y_end: data[4].to_i
-      }
     end
 
   end

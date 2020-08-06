@@ -16,14 +16,15 @@ class HocrReaderTest < Minitest::Test
    </div>
   </div>
 HEREDOC
-    @reader = HocrReader::Reader.new
+    @reader = HocrReader::Reader.new(@hocr)
   end
 
   def test_that_it_has_a_version_number
     refute_nil ::HocrReader::VERSION
   end
 
+
   def test_it_extracts_words
-    assert_equal 'Name Arial Century Peter',@reader.to_s(@reader.hocr_to_text(@hocr)).strip
+    assert_equal 'Name Arial Century Peter',@reader.hocr_to_text.strip
   end
 end

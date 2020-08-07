@@ -4,50 +4,60 @@ require "hocr_reader/part"
 require 'nokogiri'
 
 module HocrReader
-  Parts = [:ocr_page,
-        :ocr_carea,
-        :ocr_par,
-        :ocr_line,
-        :ocrx_word]
 
-  Tags = {ocr_page: 'div class=ocr_page',
-          ocr_carea: 'div class=ocr_carea',
-          ocr_par: 'class=ocr_par',
-          ocr_line: 'span class=ocr_line',
-          ocrx_word: 'span.ocrx_word'}
+  Tags = {pages: '.ocr_page',
+          areas: '.ocr_carea',
+          paragraphs:   '.ocr_par',
+          lines:  '.ocr_line',
+          words: '.ocrx_word'}
 
   class Reader
-    attr_accessor :string, :parts
+    attr_accessor :parts
+
     def initialize(str)
       @string = str
+      @html = Nokogiri::HTML(@string)
     end
 
-    def hocr_to_text
-      html = Nokogiri::HTML(@string)
-      extract_parts_from_html(html,:ocrx_word)
-      convert_to_s(@parts)
-    end
-
-
-    def extract_parts_from_html(html, part_name)
-      @parts = []
-      tag = Tags[part_name]
-      tag_pair = tag + ', ' + tag
-      # 'span.ocrx_word, span.ocr_word'
-        html.css(tag_pair)
-          .reject { |word| word.text.strip.empty? }
-          .each do |word|
-        word_attributes = word.attributes['title'].value.to_s
-                              .delete(';').split(' ')
-        part = Part.new(word, word_attributes)
-        @parts.push part
+    def method_missing(name, *args, &block)
+      if name == :to_pages
+        extract_parts :pages
+      elsif name == :to_areas
+        extract_parts :areas
+      elsif name == :to_paragraphs
+        extract_parts :paragraphs
+      elsif name == :to_lines
+        extract_parts :lines
+      elsif name == :to_words
+        extract_parts :words
+      else
+        super
       end
     end
 
 
-    def convert_to_s(parts)
+    def extract_parts( part_name)
+      @parts = []
+      tag = Tags[part_name]
+      tag_pair = tag + ', ' + tag
+      # example tags 'span.ocrx_word, span.ocrx_word'
+        @html.css(tag_pair)
+          .reject { |part| part.text.strip.empty? }
+          .each do |part|
+        title_attributes = part.attributes['title'].value.to_s
+                              .delete(';').split(' ')
+        if part.attributes['lang']
+          language_attribute = part.attributes['lang'].value.to_s
+        end
+        this_part = Part.new(part, title_attributes, language_attribute)
+        @parts.push this_part
+      end
+    end
+
+
+    def convert_to_string
       s = ''
-      parts.each {|part| s = s + part.text + ' '}
+      @parts.each {|part| s += part.text + ' '}
       s
     end
 

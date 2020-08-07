@@ -1,8 +1,9 @@
-require "hocr_reader/version"
+# frozen_string_literal: true
 
 module HocrReader
+  # class Part
   class Part
-    attr_accessor :text, :x_start, :y_start,:x_end, :y_end, :language
+    attr_accessor :text, :x_start, :y_start, :x_end, :y_end, :language
 
     def initialize(word, data, lang)
       @text = word.text
@@ -11,7 +12,6 @@ module HocrReader
       @x_end = data[3].to_i
       @y_end = data[4].to_i
       @language = lang
-    end  
-
+    end
   end
 end

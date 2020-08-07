@@ -1,4 +1,6 @@
-require "test_helper"
+# frozen_string_literal: true
+
+require 'test_helper'
 
 class HocrReaderTest < Minitest::Test
   def setup
@@ -36,13 +38,11 @@ HEREDOC
    </div>
   </div>
 HEREDOC
-    
   end
 
   def test_that_it_has_a_version_number
     refute_nil ::HocrReader::VERSION
   end
-
 
   def test_it_extracts_words
     @reader = HocrReader::Reader.new(@hocr)
@@ -99,7 +99,7 @@ HEREDOC
     r = HocrReader::Reader.new(@hocr2)
     r.to_lines
     assert_equal 2, r.parts.length
-    assert_equal 'NameArialCenturyPeter', r.convert_to_string.gsub!("\n","").gsub!(' ','')
+    assert_equal 'NameArialCenturyPeter', r.convert_to_string.gsub!("\n", '').gsub!(' ', '')
     refute r.parts[0].language
     assert_equal 'fra', r.parts[1].language
   end
@@ -108,9 +108,8 @@ HEREDOC
     r = HocrReader::Reader.new(@hocr2)
     r.to_areas
     assert_equal 2, r.parts.length
-    assert_equal 'NameArialCenturyPeter', r.convert_to_string.gsub!("\n","").gsub!(' ','')
+    assert_equal 'NameArialCenturyPeter', r.convert_to_string.gsub!("\n", '').gsub!(' ', '')
     assert_equal 'frm', r.parts[0].language
     assert_equal 'deu', r.parts[1].language
   end
-
 end

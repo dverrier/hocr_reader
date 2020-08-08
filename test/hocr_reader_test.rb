@@ -6,20 +6,6 @@ class HocrReaderTest < Minitest::Test
   def setup
     @hocr = <<HEREDOC
   <div class='ocr_page' id='page_8818' title='image ""; bbox 0 0 341 17; ppageno 8817'>
-   <div class='ocr_carea' id='block_8818_1' title="bbox 0 0 341 17">
-    <p class='ocr_par' id='par_8818_1' lang='eng' title="bbox 0 0 341 17">
-     <span class='ocr_line' id='line_8818_1' title="bbox 0 0 341 17; baseline -0.012 -1; x_size 16; x_descenders 4; x_ascenders 4">
-      <span class='ocrx_word' id='word_8818_1' lang='deu' title='bbox 0 4 49 17; x_wconf 92'>Name</span>
-      <span class='ocrx_word' id='word_8818_2' title='bbox 54 4 94 17; x_wconf 90'>Arial</span>
-      <span class='ocrx_word' id='word_8818_3' title='bbox 237 0 296 15; x_wconf 90'>Century</span>
-      <span class='ocrx_word' id='word_8818_4' title='bbox 302 0 341 12; x_wconf 90'>Peter</span>
-     </span>
-    </p>
-   </div>
-  </div>
-HEREDOC
-    @hocr2 = <<HEREDOC
-  <div class='ocr_page' id='page_8818' title='image ""; bbox 0 0 341 17; ppageno 8817'>
    <div class='ocr_carea' id='block_8818_1' lang='frm' title="bbox 0 0 341 17">
     <p class='ocr_par' id='par_8818_1' lang='eng' title="bbox 0 0 341 17">
       <span class='ocr_line' id='line_8818_1' title="bbox 0 0 341 17; baseline -0.012 -1; x_size 16; x_descenders 4; x_ascenders 4">
@@ -95,8 +81,9 @@ HEREDOC
     assert_equal 'xyz', r.parts[0].language
   end
 
+  # rubocop:disable Metrics/AbcSize
   def test_it_extracts_lines
-    r = HocrReader::Reader.new(@hocr2)
+    r = HocrReader::Reader.new(@hocr)
     r.to_lines
     assert_equal 2, r.parts.length
     assert_equal 'NameArialCenturyPeter', r.convert_to_string.gsub!("\n", '').gsub!(' ', '')
@@ -105,11 +92,22 @@ HEREDOC
   end
 
   def test_it_extracts_areas
-    r = HocrReader::Reader.new(@hocr2)
+    r = HocrReader::Reader.new(@hocr)
     r.to_areas
     assert_equal 2, r.parts.length
     assert_equal 'NameArialCenturyPeter', r.convert_to_string.gsub!("\n", '').gsub!(' ', '')
     assert_equal 'frm', r.parts[0].language
     assert_equal 'deu', r.parts[1].language
+  end
+  # rubocop:enable Metrics/AbcSize
+
+  def test_it_returns_a_box
+    r = HocrReader::Reader.new(@hocr)
+    r.to_areas
+    box = r.parts[0].to_box
+    assert_equal 0, box[:x_start]
+    assert_equal 0, box[:y_start]
+    assert_equal 341, box[:x_end]
+    assert_equal 17, box[:y_end]
   end
 end

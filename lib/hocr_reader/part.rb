@@ -13,5 +13,14 @@ module HocrReader
       @y_end = data[4].to_i
       @language = lang
     end
+
+    def to_box
+      { text: @text,
+        x_start: @x_start,
+        y_start: @y_start,
+        x_end: @x_end,
+        y_end: @y_end,
+        language: @language }
+    end
   end
 end

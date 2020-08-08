@@ -2,6 +2,7 @@ PATH
   remote: .
   specs:
     hocr_reader (0.1.0)
+      nokogiri (~> 1.10.10)
 
 GEM
   remote: https://rubygems.org/

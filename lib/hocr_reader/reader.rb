@@ -30,6 +30,7 @@ module HocrReader
       end
     end
 
+    # rubocop:disable Metrics/MethodLength, Metrics/AbcSize
     def extract_parts(part_name)
       @parts = []
       tag = TAGS[part_name]
@@ -45,6 +46,7 @@ module HocrReader
         @parts.push this_part
       end
     end
+    # rubocop:enable Metrics/MethodLength, Metrics/AbcSize
 
     def convert_to_string
       s = ''

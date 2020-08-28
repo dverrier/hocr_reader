@@ -40,7 +40,7 @@ module HocrReader
            .reject { |part| part.text.strip.empty? }
            .each do |part|
         title_attributes = part.attributes['title'].value.to_s
-                               .delete(';').split(' ')
+                               .split(';')
         language_attribute = part.attributes['lang'].value.to_s if part.attributes['lang']
         this_part = Part.new(part, title_attributes, language_attribute)
         @parts.push this_part

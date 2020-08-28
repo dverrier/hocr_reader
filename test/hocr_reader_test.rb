@@ -104,10 +104,20 @@ HEREDOC
   def test_it_returns_a_box
     r = HocrReader::Reader.new(@hocr)
     r.to_areas
-    box = r.parts[0].to_box
-    assert_equal 0, box[:x_start]
-    assert_equal 0, box[:y_start]
-    assert_equal 341, box[:x_end]
-    assert_equal 17, box[:y_end]
+    part = r.parts[0]
+    assert_equal 0, part.x_start
+    assert_equal 0, part.y_start
+    assert_equal 341, part.x_end
+    assert_equal 17, part.y_end
+  end
+
+  def test_it_finds_confidence_levels
+    s = "<span class='ocrx_word' id='word_1_2' title='bbox 545 2012 899 2073; x_wconf 95.1;'>Peter</span>"
+    r = HocrReader::Reader.new(s)
+    r.to_words
+    assert_equal 1, r.parts.length
+    part = r.parts[0]
+    assert_equal 'Peter', r.convert_to_string.strip
+    assert_equal 95.1, part.x_wconf
   end
 end

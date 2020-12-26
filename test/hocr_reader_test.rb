@@ -32,26 +32,31 @@ HEREDOC
 
   def test_it_extracts_words
     @reader = HocrReader::Reader.new(@hocr)
-    @reader.to_words
+    r = @reader.to_words
+    assert 4, r.length
+    assert_equal 'Name', r[0].text
+    assert_equal 'word', r[0].part_name
     assert_equal 'Name Arial Century Peter', @reader.convert_to_string.strip
   end
 
   def test_it_extracts_a_word
-    s = "<span class='ocrx_word' id='word_8818_4' lang='xyz'title='bbox 302 0 341 12; x_wconf 90'>Peter</span>"
+    s = "<span class='ocrx_word' id='word_8818_4' lang='xyz' title='bbox 302 0 341 12; x_wconf 90'>Peter</span>"
     r = HocrReader::Reader.new(s)
     r.to_words
     assert_equal 1, r.parts.length
     assert_equal 'Peter', r.convert_to_string.strip
     assert_equal 'xyz', r.parts[0].language
+    assert_equal 'word', r.parts[0].part_name
   end
 
   def test_it_extracts_a_line
-    s = "<span class='ocr_line' id='word_8818_4' lang='xyz'title='bbox 302 0 341 12; x_wconf 90'>Peter</span>"
+    s = "<span class='ocr_line' id='word_8818_4' lang='xyz' title='bbox 302 0 341 12; x_wconf 90'>Peter</span>"
     r = HocrReader::Reader.new(s)
     r.to_lines
     assert_equal 1, r.parts.length
     assert_equal 'Peter', r.convert_to_string.strip
     assert_equal 'xyz', r.parts[0].language
+    assert_equal 'line', r.parts[0].part_name
   end
 
   def test_it_extracts_a_paragraph
@@ -61,6 +66,7 @@ HEREDOC
     assert_equal 1, r.parts.length
     assert_equal 'Peter', r.convert_to_string.strip
     assert_equal 'xyz', r.parts[0].language
+    assert_equal 'paragraph', r.parts[0].part_name
   end
 
   def test_it_extracts_an_area
@@ -70,6 +76,7 @@ HEREDOC
     assert_equal 1, r.parts.length
     assert_equal 'Peter', r.convert_to_string.strip
     assert_equal 'xyz', r.parts[0].language
+    assert_equal 'area', r.parts[0].part_name
   end
 
   def test_it_extracts_a_page
@@ -79,6 +86,7 @@ HEREDOC
     assert_equal 1, r.parts.length
     assert_equal 'Peter', r.convert_to_string.strip
     assert_equal 'xyz', r.parts[0].language
+    assert_equal 'page', r.parts[0].part_name
   end
 
   # rubocop:disable Metrics/AbcSize
@@ -109,6 +117,16 @@ HEREDOC
     assert_equal 0, part.y_start
     assert_equal 341, part.x_end
     assert_equal 17, part.y_end
+  end
+
+  def test_it_finds_string_params
+    s = "<span class='ocrx_word' id='word_1_2' title='bbox 545 2012 899 2073; x_alphabet latin'>Peter</span>"
+    r = HocrReader::Reader.new(s)
+    r.to_words
+    assert_equal 1, r.parts.length
+    part = r.parts[0]
+    assert_equal 'Peter', r.convert_to_string.strip
+    assert_equal 'latin', part.x_alphabet
   end
 
   def test_it_finds_confidence_levels

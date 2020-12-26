@@ -42,9 +42,10 @@ module HocrReader
         title_attributes = part.attributes['title'].value.to_s
                                .split(';')
         language_attribute = part.attributes['lang'].value.to_s if part.attributes['lang']
-        this_part = Part.new(part, title_attributes, language_attribute)
+        this_part = Part.new(part_name, part, title_attributes, language_attribute)
         @parts.push this_part
       end
+      @parts
     end
     # rubocop:enable Metrics/MethodLength, Metrics/AbcSize
 

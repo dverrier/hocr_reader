@@ -5,9 +5,11 @@ require 'bigdecimal'
 module HocrReader
   # class Part
   class Part
-    attr_accessor :text, :x_start, :y_start, :x_end, :y_end, :language, :attributes
+    attr_accessor :part_name, :text, 
+                  :x_start, :y_start, :x_end, :y_end, :language, :attributes
 
-    def initialize(phrase, title_attributes, lang)
+    def initialize(part_name, phrase, title_attributes, lang)
+      @part_name = part_name[3..-2]
       @text = phrase.text
       @attributes = split_the_attributes title_attributes
       @x_start = bbox[0].to_i
@@ -36,8 +38,10 @@ module HocrReader
         parameters.each do |parameter|
           value << to_numeric(parameter)
         end
-      else
+      elsif numeric?(parameters[0])
         value = to_numeric(parameters[0])
+      else
+        value = parameters[0]
       end
       value
     end
@@ -60,6 +64,10 @@ module HocrReader
       else
         num.to_f
       end
+    end
+
+    def numeric?(str)
+      Float(str) != nil rescue false
     end
   end
 end

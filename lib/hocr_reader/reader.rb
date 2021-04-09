@@ -7,9 +7,9 @@ module HocrReader
            to_lines: '.ocr_line',
            to_words: '.ocrx_word' }.freeze
   CHILDREN = { to_pages: :to_areas,
-           to_areas: :to_paragraphs,
-           to_paragraphs: :to_lines,
-           to_lines: :to_words }.freeze
+               to_areas: :to_paragraphs,
+               to_paragraphs: :to_lines,
+               to_lines: :to_words }.freeze
   # class reader
   class Reader
     attr_accessor :parts
@@ -34,41 +34,39 @@ module HocrReader
       end
     end
 
-    # rubocop:disable Metrics/MethodLength, Metrics/AbcSize
-    # rubocop:enable Metrics/MethodLength, Metrics/AbcSize
-
-    def create_part(part_name, part)
-       title_attributes = part.attributes['title'].value.to_s.split(';')
-        language_attribute = part.attributes['lang'].value.to_s if part.attributes['lang']
-        Part.new(part_name, part, title_attributes, language_attribute)
-    end
-
     def extract_parts(part_name)
       @parts = []
       tag = TAGS[part_name]
       tag_pair = tag + ', ' + tag
       @html.css(tag_pair)
-        .reject { |node| node.text.strip.empty? }.each do |node|
-        @parts.push process_node(part_name, node)
+           .reject { |node| node.text.strip.empty? }.each do |node|
+        @parts.push create_part_from_node(part_name, node)
       end
       @parts
     end
 
-    def process_node(part_name, node, parent = nil)
-      tag = TAGS[part_name]
+    def create_part_from_node(part_name, node, parent = nil)
       child_name = CHILDREN[part_name]
       child_tag = TAGS[child_name]
-      tag_pair = tag + ', ' + tag
+
+      new_part = create_part part_name, node, parent
       if child_tag
         child_pair = child_tag + ', ' + child_tag
-      end
-      parent = create_part part_name, node
-      if child_tag
         node.children.css(child_pair).each do |child_node|
-          parent.children << (process_node(child_name, child_node, parent)) if parent
+          new_part.children << create_part_from_node(child_name, child_node, new_part)
         end
       end
-      parent
+      new_part
+    end
+
+    def create_part(part_name, part, parent)
+      title_attributes = part.attributes['title'].value.to_s.split(';')
+      if part.attributes['lang']
+        language_attribute = part.attributes['lang'].value.to_s
+      elsif parent
+        language_attribute = parent.language
+      end
+      Part.new(part_name, part, title_attributes, language_attribute, parent)
     end
 
     def to_s
@@ -78,8 +76,8 @@ module HocrReader
     end
 
     def to_a
-      a =[]
-      @parts.each {|part| a << part.text}
+      a = []
+      @parts.each { |part| a << part.text }
     end
   end
 end

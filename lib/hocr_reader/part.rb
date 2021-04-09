@@ -6,27 +6,38 @@ module HocrReader
   # class Part
   class Part
     attr_accessor :type, :children,
-                  :x_start, :y_start, :x_end, :y_end, :language, :attributes
+                  :language, :attributes
 
-    def initialize(part_name, phrase, title_attributes, lang)
+    def initialize(part_name, phrase, title_attributes, lang, parent)
       @type = part_name[3..-2]
-      if @type == 'word'
-        @text = phrase.text
-      end
+      @text = phrase.text if @type == 'word'
       @children = []
       @attributes = split_the_attributes title_attributes
-      @x_start = bbox[0].to_i
-      @y_start = bbox[1].to_i
-      @x_end = bbox[2].to_i
-      @y_end = bbox[3].to_i
       @language = lang
+      @parent = parent
+    end
+
+    def x_start
+      bbox[0].to_i
+    end
+
+    def y_start
+      bbox[1].to_i
+    end
+
+    def x_end
+      bbox[2].to_i
+    end
+
+    def y_end
+      bbox[3].to_i
     end
 
     def text
       if @children.empty?
         @text
       else
-        children.inject([]){|text_array, c| text_array << c.text}
+        children.inject([]) { |text_array, c| text_array << c.text }
       end
     end
 
@@ -45,16 +56,12 @@ module HocrReader
     def convert_to_parameters(attribute)
       parameters = attribute.slice(1..-1)
       if parameters.length > 1
-        value = []
-        parameters.each do |parameter|
-          value << to_numeric(parameter)
-        end
+        to_list(parameters)
       elsif numeric?(parameters[0])
-        value = to_numeric(parameters[0])
+        to_numeric(parameters[0])
       else
-        value = parameters[0]
+        parameters[0]
       end
-      value
     end
 
     def method_missing(name, *args, &block)
@@ -68,6 +75,14 @@ module HocrReader
       end
     end
 
+    def to_list(parameters)
+      value = []
+      parameters.each do |parameter|
+        value << to_numeric(parameter)
+      end
+      value
+    end
+
     def to_numeric(anything)
       num = BigDecimal(anything)
       if num.frac.zero?
@@ -78,7 +93,9 @@ module HocrReader
     end
 
     def numeric?(str)
-      Float(str) != nil rescue false
+      !Float(str).nil?
+    rescue StandardError
+      false
     end
 
     def to_s

@@ -98,14 +98,11 @@ HEREDOC
     assert_equal 'page', r.parts[0].type
   end
 
-  # rubocop:disable Metrics/AbcSize
   def test_it_extracts_lines
     r = HocrReader::Reader.new(@hocr)
     lines = r.to_lines
     assert_equal 4, lines.length
     assert_equal ['Name','Arial'], lines[0].text
-    refute r.parts[0].language
-    assert_equal 'fra', r.parts[1].language
   end
 
   def test_it_extracts_areas
@@ -116,7 +113,6 @@ HEREDOC
     assert_equal 'frm', r.parts[0].language
     assert_equal 'deu', r.parts[1].language
   end
-  # rubocop:enable Metrics/AbcSize
 
   def test_it_returns_a_box
     r = HocrReader::Reader.new(@hocr)
@@ -147,6 +143,21 @@ HEREDOC
     # pp part
     assert_equal 'Peter', part.text
     assert_equal 95.1, part.x_wconf
+  end
+
+  def test_it_detects_language
+    r = HocrReader::Reader.new(@hocr)
+    lines = r.to_lines
+    refute lines[0].language
+    assert_equal 'deu', lines[0].children[0].language
+    refute lines[0].children[1].language
+  end
+
+  def test_it_inherits_language
+    r = HocrReader::Reader.new(@hocr)
+    lines = r.to_lines
+    assert_equal 'fra', lines[2].language
+    assert_equal 'fra', lines[2].children[0].language
   end
 
   def test_it_creates_nested_structure

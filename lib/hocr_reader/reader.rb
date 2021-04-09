@@ -21,7 +21,7 @@ module HocrReader
 
     def method_missing(name, *args, &block)
       if TAGS[name]
-        extract_parts2 name
+        extract_parts name
       else
         super
       end
@@ -35,18 +35,6 @@ module HocrReader
     end
 
     # rubocop:disable Metrics/MethodLength, Metrics/AbcSize
-    def extract_parts(part_name)
-      @parts = []
-      tag = TAGS[part_name]
-      tag_pair = tag + ', ' + tag
-      # example tags 'span.ocrx_word, span.ocrx_word'
-      @html.css(tag_pair)
-           .reject { |part| part.text.strip.empty? }
-           .each do |part|
-        @parts.push create_part(part_name, part)
-      end
-      @parts
-    end
     # rubocop:enable Metrics/MethodLength, Metrics/AbcSize
 
     def create_part(part_name, part)
@@ -55,7 +43,7 @@ module HocrReader
         Part.new(part_name, part, title_attributes, language_attribute)
     end
 
-    def extract_parts2(part_name)
+    def extract_parts(part_name)
       @parts = []
       tag = TAGS[part_name]
       tag_pair = tag + ', ' + tag

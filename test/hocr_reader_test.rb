@@ -185,11 +185,4 @@ HEREDOC
     assert_equal 'Name', w[0].text
   end
 
-  def test_lines
-    r = HocrReader::Reader.new(@hocr)
-    l = r.extract_parts2 :to_lines
-    # pp l
-    # pp l.text
-  end
-
 end

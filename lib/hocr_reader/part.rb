@@ -5,18 +5,29 @@ require 'bigdecimal'
 module HocrReader
   # class Part
   class Part
-    attr_accessor :part_name, :text, 
+    attr_accessor :type, :children,
                   :x_start, :y_start, :x_end, :y_end, :language, :attributes
 
     def initialize(part_name, phrase, title_attributes, lang)
-      @part_name = part_name[3..-2]
-      @text = phrase.text
+      @type = part_name[3..-2]
+      if @type == 'word'
+        @text = phrase.text
+      end
+      @children = []
       @attributes = split_the_attributes title_attributes
       @x_start = bbox[0].to_i
       @y_start = bbox[1].to_i
       @x_end = bbox[2].to_i
       @y_end = bbox[3].to_i
       @language = lang
+    end
+
+    def text
+      if @children.empty?
+        @text
+      else
+        children.inject([]){|text_array, c| text_array << c.text}
+      end
     end
 
     def split_the_attributes(title_attributes)
@@ -68,6 +79,10 @@ module HocrReader
 
     def numeric?(str)
       Float(str) != nil rescue false
+    end
+
+    def to_s
+      text
     end
   end
 end

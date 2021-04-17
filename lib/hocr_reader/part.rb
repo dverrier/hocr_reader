@@ -33,6 +33,14 @@ module HocrReader
       bbox[3].to_i
     end
 
+    def width
+      x_end - x_start
+    end
+    
+    def height
+      y_end - y_start
+    end
+
     def text
       if @children.empty?
         @text

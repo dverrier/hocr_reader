@@ -4,6 +4,9 @@ require 'test_helper'
 
 class HocrReaderTest < Minitest::Test
   def setup
+    @hocr_bad = <<HEREDOC
+     <div class='ocr_page' id='page_1' title='image; bbox 1458 366 404 92; ppageno 0'></div>
+HEREDOC
     @hocr = <<HEREDOC
   <div class='ocr_page' id='page_8818' title='image ""; bbox 11 12 13 14; ppageno 8817'>
    <div class='ocr_carea' id='block_8818_1' lang='frm' title="bbox 21 22 23 24">
@@ -194,6 +197,24 @@ HEREDOC
     assert_equal 7, w.length
     assert_equal 51, w[0].bbox[0]
     assert_equal 'Name', w[0].text
+  end
+
+  def test_it_manages_missing_children
+    r = HocrReader::Reader.new(@hocr_bad)
+    lines = r.to_lines
+    assert lines
+  end
+
+  def test_it_calculates_width
+    r = HocrReader::Reader.new(@hocr)
+    p = r.to_words[0]
+    assert_equal 2, p.width
+  end
+
+  def test_it_calculates_height
+    r = HocrReader::Reader.new(@hocr)
+    p = r.to_words[0]
+    assert_equal 2, p.height
   end
 
 end

@@ -5,16 +5,25 @@ require 'bigdecimal'
 module HocrReader
   # class Part
   class Part
-    attr_accessor :type, :children,
+    attr_accessor :type, :children, :part_id, :parent, 
                   :language, :attributes
 
-    def initialize(part_name, phrase, title_attributes, lang, parent)
+    def initialize(part_name, phrase, title_attributes, lang,  part_id, parent)
       @type = part_name[3..-2]
       @text = phrase.text if @type == 'word'
       @children = []
       @attributes = split_the_attributes title_attributes
       @language = lang
+      @part_id = part_id
       @parent = parent
+    end
+
+    def first_child
+      @children[0]
+    end
+
+    def last_child
+      @children[-1]
     end
 
     def x_start

@@ -61,12 +61,13 @@ module HocrReader
 
     def create_part(part_name, part, parent)
       title_attributes = part.attributes['title'].value.to_s.split(';')
+      part_id = part.attributes['id'].value.to_s
       if part.attributes['lang']
         language_attribute = part.attributes['lang'].value.to_s
       elsif parent
         language_attribute = parent.language
       end
-      Part.new(part_name, part, title_attributes, language_attribute, parent)
+      Part.new(part_name, part, title_attributes, language_attribute, part_id, parent)
     end
 
     def to_s

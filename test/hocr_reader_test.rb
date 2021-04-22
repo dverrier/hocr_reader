@@ -59,6 +59,15 @@ HEREDOC
     assert_equal 'Peter', r.to_s.strip
     assert_equal 'xyz', r.parts[0].language
     assert_equal 'word', r.parts[0].type
+    assert_equal 'word_8818_4', r.parts[0].part_id
+  end
+
+  def test_it_extracts_nested_words
+    r = HocrReader::Reader.new(@hocr)
+    w = r.to_words
+    assert_equal 7, w.length
+    assert_equal 51, w[0].bbox[0]
+    assert_equal 'Name', w[0].text
   end
 
   def test_it_extracts_a_line
@@ -71,6 +80,21 @@ HEREDOC
     assert_equal 'line', r.parts[0].type
   end
 
+  def test_it_creates_nested_lines
+    r = HocrReader::Reader.new(@hocr)
+    l = r.to_lines
+    assert_equal 4, l.length
+    assert_equal 41, l[0].bbox[0]
+    assert_equal ['Name','Arial'], l[0].text
+    assert_equal 2, l[0].children.length
+    assert_equal ['Fantasy'], l[1].text
+    assert_equal ['Century', 'Peter'], l[2].text
+    assert_equal ['Twentieth','David'], l[3].text
+    first_child = l[0].first_child
+    assert first_child
+    assert_equal l[0], first_child.parent
+  end
+
   def test_it_extracts_a_paragraph
     s = "<p class='ocr_par' id='word_8818_4' lang='xyz'title='bbox 302 0 341 12; x_wconf 90'>Peter</p>"
     r = HocrReader::Reader.new(s)
@@ -79,6 +103,18 @@ HEREDOC
     # assert_equal 'Peter', r.to_s.strip
     assert_equal 'xyz', r.parts[0].language
     assert_equal 'paragraph', r.parts[0].type
+  end
+
+  def test_it_creates_nested_paragraphs
+    r = HocrReader::Reader.new(@hocr)
+    para = r.to_paragraphs
+    assert_equal 3, para.length
+    assert_equal 31, para[0].bbox[0]
+    assert_equal 1, para[0].children.length
+    assert_equal 2, para[2].children.length
+    assert_equal [['Name','Arial']], para[0].text
+    assert_equal [['Fantasy']], para[1].text
+    assert_equal [['Century', 'Peter'],['Twentieth','David']], para[2].text
   end
 
   def test_it_extracts_an_area
@@ -91,6 +127,17 @@ HEREDOC
     assert_equal 'area', r.parts[0].type
   end
 
+  def test_it_creates_nested_areas
+    r = HocrReader::Reader.new(@hocr)
+    a = r.to_areas
+    assert_equal 2,a.length
+    assert_equal 21, a[0].bbox[0]
+    assert_equal 2, a[0].children.length
+    assert_equal 1, a[1].children.length
+    assert_equal [[['Name','Arial']],[['Fantasy']]], a[0].text
+    assert_equal [[['Century', 'Peter'],['Twentieth','David']]], a[1].text
+  end
+
   def test_it_extracts_a_page
     s = "<div class='ocr_page' id='word_8818_4' lang='xyz'title='bbox 302 0 341 12; x_wconf 90'>Peter</div>"
     r = HocrReader::Reader.new(s)
@@ -99,6 +146,14 @@ HEREDOC
     # assert_equal 'Peter', r.to_s.strip
     assert_equal 'xyz', r.parts[0].language
     assert_equal 'page', r.parts[0].type
+  end
+
+  def test_it_creates_nested_pages
+    r = HocrReader::Reader.new(@hocr)
+    p = r.to_pages
+    assert_equal 1, p.length
+    assert_equal 11, p[0].bbox[0]  
+    assert_equal [[[['Name','Arial']],[['Fantasy']]], [[['Century', 'Peter'],['Twentieth','David']]]], p[0].text
   end
 
   def test_it_extracts_lines
@@ -161,42 +216,6 @@ HEREDOC
     lines = r.to_lines
     assert_equal 'fra', lines[2].language
     assert_equal 'fra', lines[2].children[0].language
-  end
-
-  def test_it_creates_nested_structure
-    r = HocrReader::Reader.new(@hocr)
-
-    p = r.to_pages
-    assert_equal 1, p.length
-    assert_equal 11, p[0].bbox[0]
-    
-    assert_equal [[[['Name','Arial']],[['Fantasy']]], [[['Century', 'Peter'],['Twentieth','David']]]], p[0].text
-
-    a = r.to_areas
-    assert_equal 2,a.length
-    assert_equal 21, a[0].bbox[0]
-    assert_equal [[['Name','Arial']],[['Fantasy']]], a[0].text
-    assert_equal [[['Century', 'Peter'],['Twentieth','David']]], a[1].text
-
-    para = r.to_paragraphs
-    assert_equal 3, para.length
-    assert_equal 31, para[0].bbox[0]
-    assert_equal [['Name','Arial']], para[0].text
-    assert_equal [['Fantasy']], para[1].text
-    assert_equal [['Century', 'Peter'],['Twentieth','David']], para[2].text
-
-    l = r.to_lines
-    assert_equal 4, l.length
-    assert_equal 41, l[0].bbox[0]
-    assert_equal ['Name','Arial'], l[0].text
-    assert_equal ['Fantasy'], l[1].text
-    assert_equal ['Century', 'Peter'], l[2].text
-    assert_equal ['Twentieth','David'], l[3].text
-
-    w = r.to_words
-    assert_equal 7, w.length
-    assert_equal 51, w[0].bbox[0]
-    assert_equal 'Name', w[0].text
   end
 
   def test_it_manages_missing_children

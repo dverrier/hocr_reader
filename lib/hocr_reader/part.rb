@@ -16,6 +16,7 @@ module HocrReader
       @language = lang
       @part_id = part_id
       @parent = parent
+      @discontinuity = 0
     end
 
     def first_child

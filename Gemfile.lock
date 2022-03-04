@@ -8,11 +8,11 @@ GEM
   remote: https://rubygems.org/
   specs:
     mini_portile2 (2.5.3)
-    minitest (5.14.4)
+    minitest (5.15.0)
     nokogiri (1.11.7)
       mini_portile2 (~> 2.5.0)
       racc (~> 1.4)
-    racc (1.5.2)
+    racc (1.6.0)
     rake (13.0.6)
 
 PLATFORMS
@@ -25,4 +25,4 @@ DEPENDENCIES
   rake (~> 13.0)
 
 BUNDLED WITH
-   2.2.27
+   2.3.7

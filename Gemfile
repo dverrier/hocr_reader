@@ -7,7 +7,7 @@ gem 'rake', "~> 13.0"
 
 group :test do
   gem 'minitest', "~> 5.0"
-  gem 'mocha'
-  gem 'nokogiri', "~> 1.13.3"
+  gem 'mocha', "~> 1.14.0"
+  gem 'nokogiri', "~> 1.13.8"
   gem 'simplecov', require: false
 end

@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    hocr_reader (1.2.0)
+    hocr_reader (1.3.0)
       nokogiri (~> 1.13.3)
 
 GEM
@@ -29,8 +29,8 @@ PLATFORMS
 DEPENDENCIES
   hocr_reader!
   minitest (~> 5.0)
-  mocha
-  nokogiri (~> 1.13.3)
+  mocha (~> 1.14.0)
+  nokogiri (~> 1.13.8)
   rake (~> 13.0)
   simplecov
 
